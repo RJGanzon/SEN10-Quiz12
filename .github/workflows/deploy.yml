@@ -3,34 +3,38 @@ name: Deploy Static Site to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - main # Triggers the workflow every time you push to the main branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Specifies the operating system to run the actions
+    runs-on: ubuntu-latest # The OS that runs this workflow
 
     steps:
-      # Step 1: Checkout code
+      # Step 1: Checkout your repository
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js (needed for the JS linter)
+      # Step 2: Set up Node.js (use modern version for ESLint 9+)
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: "20" # Specify the Node.js version to use
+          node-version: "20" # Node 20 supports Object.hasOwn and other modern features
 
       # Step 3: Install dependencies
       - name: Install dependencies
-        run: npm install
+        run: npm ci # Uses clean install for reproducible builds
 
-      # Step 4: Run the JS linter (ESLint)
+      # Step 4: Fix ESLint permissions (Ubuntu-only issue)
+      - name: Fix ESLint permissions
+        run: chmod +x node_modules/.bin/eslint
+
+      # Step 5: Run JavaScript linter
       - name: Run JS linter
-        run: npm run lint # This runs ESLint based on the script in package.json
+        run: npm run lint # Executes "eslint ." from package.json
 
-      # Step 5: Build and deploy to GitHub Pages
+      # Step 6: Build and deploy to GitHub Pages
       - name: Build and deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages # The target branch for GitHub Pages
-          folder: . # Folder to deploy (use './' for root)
+          branch: gh-pages # The branch to deploy to
+          folder: . # Folder to deploy (use '.' for root directory)
