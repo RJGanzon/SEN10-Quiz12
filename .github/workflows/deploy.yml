@@ -6,38 +6,64 @@ on:
       - main # Triggers the workflow every time you push to the main branch
 
 permissions:
-  contents: write # 👈 THIS IS CRITICAL
+  contents: write # 👈 Required for deployment
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest # The OS that runs this workflow
-
+  lint:
+    runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout your repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js (use modern version for ESLint 9+)
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # Node 20 supports Object.hasOwn and other modern features
+          node-version: "20"
 
-      # Step 3: Install dependencies
       - name: Install dependencies
-        run: npm ci # Uses clean install for reproducible builds
+        run: npm ci
 
-      # Step 4: Fix ESLint permissions (Ubuntu-only issue)
       - name: Fix ESLint permissions
         run: chmod +x node_modules/.bin/eslint
 
-      # Step 5: Run JavaScript linter
       - name: Run JS linter
-        run: npm run lint # Executes "eslint ." from package.json
+        run: npm run lint
 
-      # Step 6: Build and deploy to GitHub Pages
+  test:
+    runs-on: ubuntu-latest
+    needs: lint # 👈 Only runs if lint passes
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest tests
+        run: npm test # Executes "jest" from package.json
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [lint, test] # 👈 Only runs if both lint and test pass
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Build and deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          branch: gh-pages # The branch to deploy to
-          folder: . # Folder to deploy (use '.' for root directory)
+          branch: gh-pages # Deploy branch
+          folder: . # Root folder (your static site)
