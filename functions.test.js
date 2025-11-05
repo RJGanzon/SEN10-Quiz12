@@ -6,5 +6,5 @@ test("adds two numbers correctly", () => {
 });
 
 test("this test should fail", () => {
-  expect(add(2, 2)).toBe(4); // ❌ failing test for demonstration
+  expect(add(2, 2)).toBe(5); // ❌ failing test for demonstration
 });

@@ -4,24 +4,30 @@ import pluginJest from "eslint-plugin-jest";
 export default [
   js.configs.recommended,
 
+  // ✅ Node/CommonJS environment (for functions.js)
   {
     files: ["functions.js"],
     languageOptions: {
       sourceType: "commonjs",
-    },
-    env: {
-      node: true,
+      globals: {
+        module: true,
+        require: true,
+        process: true,
+      },
     },
   },
 
+  // ✅ Jest test environment (for functions.test.js)
   {
     files: ["functions.test.js"],
     languageOptions: {
       sourceType: "commonjs",
-    },
-    env: {
-      node: true,
-      jest: true,
+      globals: {
+        test: true,
+        expect: true,
+        require: true,
+        module: true,
+      },
     },
     plugins: {
       jest: pluginJest,
@@ -31,17 +37,24 @@ export default [
     },
   },
 
+  // ✅ Browser environment (for script.js)
   {
     files: ["script.js"],
-    env: {
-      browser: true,
+    languageOptions: {
+      globals: {
+        window: true,
+        document: true,
+        console: true,
+        setTimeout: true,
+      },
     },
   },
 
+  // ✅ Global rules
   {
     rules: {
-      "no-undef": "off",
       "no-unused-vars": "warn",
+      "no-undef": "off",
     },
   },
 ];
